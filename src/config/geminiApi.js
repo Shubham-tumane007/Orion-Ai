@@ -1,11 +1,13 @@
 // src/config/geminiApi.js
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = ' your google api key ';
+// Note: Ensure this API key is secured in a real application, 
+// usually by using a process.env variable.
+const apiKey = 'AIzaSyD5iZOfRklwcaTwHmTPUq293C402XGWXUw'; 
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash', // <-- **FIXED: Changed from gemini-1.5-flash**
 });
 
 const generationConfig = {

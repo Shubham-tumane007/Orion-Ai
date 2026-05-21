@@ -1,103 +1,150 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useAuth0 } from "@auth0/auth0-react";
-import { FaUser, FaCog, FaSignOutAlt, FaSignInAlt, FaBars, FaTimes } from 'react-icons/fa';
+// FIXED: Changed FaslidersH to FaSlidersH
+import { FaCog, FaSignOutAlt, FaSignInAlt, FaBars, FaTimes, FaRobot, FaSlidersH } from 'react-icons/fa';
 
-const fadeIn = keyframes`
+// --- Animations ---
+
+const slideDown = keyframes`
   from {
     opacity: 0;
+    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 `;
 
-const fadeOut = keyframes`
+const slideInRight = keyframes`
   from {
-    opacity: 1;
+    opacity: 0;
+    transform: translateX(-10px);
   }
   to {
-    opacity: 0;
+    opacity: 1;
+    transform: translateX(0);
   }
 `;
+
+// --- Styled Components ---
 
 const MenuContainer = styled.div`
   position: relative;
   display: inline-block;
-  border-radius: 20px;
+  z-index: 1000;
 `;
 
-const MenuButton = styled.div`
-  width: 30px;
-  height: 22px;
+const MenuButton = styled.button`
+  width: 45px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.3s ease-in-out;
-  position: relative;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   color: #da4ea2;
-  font-size: 1.5rem;
-  
+  font-size: 1.2rem;
+  z-index: 1001;
+  position: relative;
+
+  transform: ${(props) => (props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
+
   &:hover {
-    color: #da4ea2;
+    background: #da4ea2;
+    color: white;
+    transform: ${(props) => (props.isOpen ? 'rotate(180deg) scale(1.1)' : 'rotate(0deg) scale(1.1)')};
+    box-shadow: 0 8px 25px rgba(218, 78, 162, 0.4);
   }
 
-  @media (max-width: 768px) {
-    width: 25px;
-    height: 20px;
+  &:active {
+    transform: scale(0.95);
   }
-`;
-
-const MenuIcon = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 `;
 
 const MenuItems = styled.div`
-  display: ${(props) => (props.isOpen ? 'block' : 'none')};
   position: absolute;
   right: 0;
-  background-color: white;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-  top: 40px;
-  animation: ${(props) => (props.isOpen ? fadeIn : fadeOut)} 0.3s ease-in-out;
-  
+  top: 60px;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transform-origin: top right;
+  animation: ${slideDown} 0.3s ease-out forwards;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 18px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    transform: rotate(45deg);
+    border-radius: 2px;
+  }
+
   @media (max-width: 768px) {
-    width: 100vw;
-    left: 0;
-    right: 0;
-    top: 60px; /* Adjust based on your button size and position */
+    right: -10px;
+    width: 220px;
   }
 `;
 
 const MenuItem = styled.div`
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
   display: flex;
   align-items: center;
+  padding: 12px 15px;
+  color: #444;
+  font-weight: 500;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  animation: ${slideInRight} 0.4s ease forwards;
+  opacity: 0;
+  animation-delay: ${(props) => props.delay || '0s'};
+
+  svg {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    color: #da4ea2;
+    transition: transform 0.2s ease;
+  }
 
   &:hover {
-    background-color: rgb(218, 78, 162);
-  }
-
-  & > svg {
-    margin-right: 8px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 10px 12px;
+    background: linear-gradient(90deg, rgba(218, 78, 162, 0.1) 0%, transparent 100%);
+    color: #da4ea2;
+    padding-left: 20px;
+    
+    svg {
+      transform: scale(1.2);
+    }
   }
 `;
 
+const Separator = styled.div`
+  height: 1px;
+  background: rgba(0,0,0,0.05);
+  margin: 5px 10px;
+`;
+
 const DropdownMenu = () => {
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -120,36 +167,62 @@ const DropdownMenu = () => {
 
   return (
     <MenuContainer ref={menuRef}>
-      <MenuButton onClick={toggleMenu}>
-        <MenuIcon>
-          {isOpen ? <FaTimes /> : <FaBars />}
-        </MenuIcon>
+      <MenuButton onClick={toggleMenu} isOpen={isOpen}>
+        {isOpen ? <FaTimes /> : <FaBars />}
       </MenuButton>
-      <MenuItems isOpen={isOpen}>
-        <MenuItem>
-          <FaUser />
-          My AI
-        </MenuItem>
-        <MenuItem>
-          <FaCog />
-          Customize AI
-        </MenuItem>
-        <MenuItem>
-          <FaCog />
-          Settings
-        </MenuItem>
-        {isAuthenticated ? (
-          <MenuItem onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
-            <FaSignOutAlt />
-            Log Out
+
+      {isOpen && (
+        <MenuItems>
+          {isAuthenticated && user && (
+            <MenuItem delay="0.05s" style={{ cursor: 'default', pointerEvents: 'none' }}>
+               <img 
+                 src={user.picture} 
+                 alt={user.name} 
+                 style={{ width: '25px', borderRadius: '50%', marginRight: '10px' }} 
+               />
+               <span style={{ fontSize: '0.85rem', color: '#888' }}>{user.given_name || "User"}</span>
+            </MenuItem>
+          )}
+
+          {isAuthenticated && <Separator />}
+
+          <MenuItem delay="0.1s">
+            <FaRobot />
+            My AI
           </MenuItem>
-        ) : (
-          <MenuItem onClick={() => loginWithRedirect()}>
-            <FaSignInAlt />
-            Log In
+          
+          <MenuItem delay="0.15s">
+            <FaCog />
+            Customize AI
           </MenuItem>
-        )}
-      </MenuItems>
+          
+          <MenuItem delay="0.2s">
+            {/* FIXED: Updated usage here as well */}
+            <FaSlidersH />
+            Settings
+          </MenuItem>
+
+          <Separator />
+
+          {isAuthenticated ? (
+            <MenuItem 
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+              delay="0.25s"
+            >
+              <FaSignOutAlt />
+              Log Out
+            </MenuItem>
+          ) : (
+            <MenuItem 
+              onClick={() => loginWithRedirect()}
+              delay="0.25s"
+            >
+              <FaSignInAlt />
+              Log In
+            </MenuItem>
+          )}
+        </MenuItems>
+      )}
     </MenuContainer>
   );
 };

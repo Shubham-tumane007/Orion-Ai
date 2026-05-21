@@ -1,12 +1,12 @@
-// src/Component/Hero.jsx
-import React, { Suspense } from 'react';
-import styled from 'styled-components';
-import Navbar from './Navbar';
-import { Canvas } from '@react-three/fiber';
-import { Environment, OrbitControls } from '@react-three/drei';
-import { Model as Earth } from './Earth'; 
-import line from '../img/line.png';
+import React, { Suspense } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
+import styled from "styled-components";
+import Navbar from "./Navbar";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Sphere, MeshDistortMaterial } from "@react-three/drei";
+import moon from "../img/moon.png";
 
+// ... (All styled components remain the same as your previous code) ...
 const Section = styled.div`
   height: 100vh;
   scroll-snap-align: center;
@@ -14,121 +14,85 @@ const Section = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-
-  @media only screen and (max-width: 768px) {
-    height: auto; /* Adjusted for responsiveness */
-  }
+  @media only screen and (max-width: 768px) { height: auto; padding: 20px; }
 `;
 
 const Container = styled.div`
   height: 100%;
   scroll-snap-align: center;
-  width: 100%;
-  max-width: 1400px; /* Added max-width for larger screens */
+  width: 1400px;
   display: flex;
   justify-content: space-between;
-
-  @media only screen and (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
+  @media only screen and (max-width: 768px) { width: 100%; flex-direction: column-reverse; align-items: center; justify-content: center; }
 `;
 
 const Left = styled.div`
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
+  flex: 3; position: relative;
+  @media only screen and (max-width: 768px) { flex: 1; width: 100%; margin-bottom: 20px; }
+`;
 
-  @media only screen and (max-width: 768px) {
-    flex: 1;
-    align-items: center;
-  }
+const Right = styled.div`
+  flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  @media only screen and (max-width: 768px) { flex: 1; text-align: center; }
 `;
 
 const Title = styled.h1`
-  font-size: 74px;
-
-  @media only screen and (max-width: 768px) {
-    font-size: 48px; /* Adjusted font size for smaller screens */
-    text-align: center;
-  }
+  font-size: 74px; text-align: center;
+  @media only screen and (max-width: 768px) { font-size: 48px; }
 `;
 
-const WhatWeDo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const Line = styled.img`
-  height: 5px;
-`;
-
-const Subtitle = styled.h2`
-  color: #da4ea2;
-`;
+const Subtitle = styled.h2` color: #da4ea2; `;
 
 const Desc = styled.p`
-  font-size: 24px;
-  color: lightgray;
-
-  @media only screen and (max-width: 768px) {
-    font-size: 18px; /* Adjusted font size for smaller screens */
-    padding: 20px;
-    text-align: center;
-  }
+  font-size: 24px; color: lightgray; text-align: center;
+  @media only screen and (max-width: 768px) { font-size: 18px; padding: 0 20px; }
 `;
 
 const Button = styled.button`
-  background-color: #da4ea2;
-  color: white;
-  font-weight: 500;
-  width: 150px; /* Increased width for better visibility */
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  background-color: #da4ea2; color: white; font-weight: 500; width: 150px; padding: 12px; border: none; border-radius: 5px; cursor: pointer;
 `;
- 
-const Right = styled.div`
-  flex: 3;
-  position: relative;
-  height: 100vh; /* Ensure Canvas takes full height */
 
-  @media only screen and (max-width: 768px) {
-    flex: 1;
-    width: 100%;
-  }
+const Img = styled.img`
+  width: 800px; height: 600px; object-fit: contain; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto; animation: animate 2s infinite ease alternate;
+  @media only screen and (max-width: 768px) { width: 300px; height: 300px; }
+  @keyframes animate { to { transform: translateY(20px); } }
 `;
+
+const SphereComponent = () => {
+  return (
+    <Sphere args={[1, 100, 200]} scale={2.4}>
+      <MeshDistortMaterial color="#3d1c56" attach="material" distort={0.5} speed={2} />
+    </Sphere>
+  );
+};
 
 const Hero = () => {
+  const navigate = useNavigate(); // Added Navigation hook
+
   return (
     <Section>
       <Navbar />
       <Container>
         <Left>
-          <Title>Think. Make. Solve.</Title>
-          <WhatWeDo>
-            <Line src={line} alt="Decorative line" />
-            <Subtitle>What I Do</Subtitle>
-          </WhatWeDo>
-          <Desc>
-            At Vision AI, we transform digital experiences with human-centered artificial intelligence.
-          </Desc>
-          <Button>Learn More</Button>
+          <Canvas style={{ width: "100%", height: "100%" }}>
+            <Suspense fallback={null}>
+              <OrbitControls enableZoom={false} />
+              <ambientLight intensity={3} />
+              <directionalLight position={[3, 2, 1]} />
+              <SphereComponent />
+            </Suspense>
+          </Canvas>
+          <Img src={moon} alt="Moon" />
         </Left>
         <Right>
-          <Canvas>
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1.5} />
-            <Suspense fallback={null}>
-              <Earth scale={[2, 2, 2]} /> 
-              <OrbitControls autoRotate  enableZoom={false}  />
-            </Suspense>
-            <Environment preset="night" />
-          </Canvas>
+          <Title>Think outside the square space</Title>
+          <Subtitle>Who I am</Subtitle>
+          <Desc>
+            Empowering creativity with cutting-edge AI solutions for visionary
+            designers and developers
+          </Desc>
+          {/* Functional Button */}
+          <Button onClick={() => navigate('/visionai')}>Get Started</Button>
         </Right>
       </Container>
     </Section>

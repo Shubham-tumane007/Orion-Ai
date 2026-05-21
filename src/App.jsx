@@ -38,18 +38,16 @@ function App() {
     <Auth0Provider
       domain="dev-4k41s6rlzf126ekk.us.auth0.com"
       clientId="suHjOiXR6AttXVk2RduXeGYhe1MdCAmE"
-      redirectUri={window.location.origin + '/visionai'}
+      authorizationParams={{
+        redirect_uri: window.location.origin + '/visionai'
+      }}
     >
       <Router>
         <Routes>
-          <Route
-            path="/visionai"
-            element={
-              <div>
-                <Visionai />
-              </div>
-            }
-          />
+          {/* Main App Route */}
+          <Route path="/visionai" element={<Visionai />} />
+          
+          {/* Landing Page Routes with Background Video */}
           <Route
             path="/*"
             element={

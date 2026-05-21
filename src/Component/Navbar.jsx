@@ -125,7 +125,7 @@ const Navbar = () => {
               <ListItem>Contact</ListItem>
             </StyledNavLink>
             <StyledNavLink to="/visionai" activeClassName="active" onClick={handleVisionAILink}>
-              <ListItem>Vision Ai</ListItem>
+              <ListItem>Orion Ai</ListItem>
             </StyledNavLink>
           </List>
         </Links>
